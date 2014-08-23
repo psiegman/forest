@@ -23,12 +23,16 @@
 <body>
     <div id="example"></div>
 
-    <script src="js/three.min.js"></script>
-    <script src="js/StereoEffect.js"></script>
-    <script src="js/DeviceOrientationControls.js"></script>
-    <script src="js/OrbitControls.js"></script>
+    <script type="text/javascript" src="js/three.min.js"></script>
+    <script type="text/javascript" src="js/has.js"></script>
+    <script type="text/javascript" src="js/StereoEffect.js"></script>
+    <script type="text/javascript" src="js/DeviceOrientationControls.js"></script>
+    <script type="text/javascript" src="js/OrbitControls.js"></script>
+	<script type="text/javascript" src="js/FirstPersonControls.js"></script>
+	<script type="text/javascript" src="js/ThreeCSG.js"></script>
 
     <script>
+		"use strict";
         var camera, scene, renderer;
         var effect, controls;
         var element, container;
@@ -57,49 +61,30 @@
             camera.position.set(0, 10, 0);
             scene.add(camera);
 
-            controls = new THREE.OrbitControls(camera, element);
-            controls.rotateUp(Math.PI / 4);
-            controls.target.set(
-                camera.position.x + 0.1,
-                camera.position.y,
-                camera.position.z
-            );
-            controls.noZoom = true;
-            controls.noPan = true;
-            controls.autoRotate = false;
-
-            function setOrientationControls(e) {
-                if (!e.alpha) {
-                    return;
-                }
-
+			// controls
+			if (has.mobile) {
                 controls = new THREE.DeviceOrientationControls(camera, true);
                 controls.connect();
                 controls.update();
-
-                element.addEventListener('click', fullscreen, false);
-
-                window.removeEventListener('deviceorientation', setOrientationControls);
-            }
-            window.addEventListener('deviceorientation', setOrientationControls, true);
-
+				element.addEventListener('click', fullscreen, false);
+			} else {
+				controls = new THREE.OrbitControls(camera, element);
+				controls.rotateUp(Math.PI / 4);
+				controls.target.set(
+					camera.position.x + 0.1,
+					camera.position.y,
+					camera.position.z
+				);
+				controls.noZoom = true;
+				controls.noPan = true;
+				controls.autoRotate = false;
+			}
 
 			// lights
             var light = new THREE.HemisphereLight(0x00ff00, 0x00ff00, 0.6);
             scene.add(light);
 
             // ground 1
-            
-/*
-            var texture = THREE.ImageUtils.loadTexture(
-                'textures/patterns/grasslight-small.jpg'
-            );
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat = new THREE.Vector2(50, 50);
-            texture.anisotropy = renderer.getMaxAnisotropy();
-*/
-
             var material = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
                 specular: 0xffffff,
@@ -113,47 +98,6 @@
             mesh.rotation.x = -Math.PI / 2;
             scene.add(mesh);
 
-/*
-
-			var textureUrl	= 'textures/patterns/grasslight-small.jpg';
-			var texture	= THREE.ImageUtils.loadTexture(textureUrl);
-			texture.wrapS	= THREE.RepeatWrapping;
-			texture.wrapT	= THREE.RepeatWrapping;
-			texture.repeat.x= 10;
-			texture.repeat.y= 10;
-			texture.anisotropy = renderer.getMaxAnisotropy();
-
-			// build object3d
-			var geometry	= new THREE.PlaneGeometry(20, 20);
-			var material	= new THREE.MeshPhongMaterial({
-				map	: texture,
-				emissive: 'green',
-			});
-			var object3d	= new THREE.Mesh(geometry, material);
-			object3d.rotateX(-Math.PI/2);
-			scene.add(object3d);;
-*/
-
-            // ground 3
-            /*
-            var groundTexture = THREE.ImageUtils.loadTexture("textures/patterns/grasslight-big.jpg");
-            groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-            groundTexture.repeat.set(25, 25);
-            groundTexture.anisotropy = 16;
-
-            var groundMaterial = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                specular: 0x111111,
-                map: groundTexture
-            });
-
-            var mesh = new THREE.Mesh(new THREE.PlaneGeometry(20000, 20000), groundMaterial);
-            mesh.position.y = -250;
-            mesh.rotation.x = -Math.PI / 2;
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-*/
-
             createForest(scene);
 
             window.addEventListener('resize', resize, false);
@@ -161,14 +105,72 @@
         }
 
         function createForest(scene) {
+			var tholosBox = createTholos(scene);
             for (var i = 0; i < 50; i++) {
-                addTree(scene);
+                addTree(scene, tholosBox);
             }
         }
 
-        function addTree(scene) {
+		function createTholos(scene) {
+			// add base
+			var baseRadius = 30;
+			var baseCenterX = 50
+			var baseCenterZ = 10
+			var tholosColor = 0xf0f0f0;
+			var tholosBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(baseRadius, baseRadius,5, 32),
+                new THREE.MeshBasicMaterial({
+                    color: tholosColor
+                })
+            );
+            tholosBase.translateX(baseCenterX);
+            tholosBase.translateZ(baseCenterZ);
+            scene.add(tholosBase);
+
+			// add pillars
+			var pillarRadius = 2;
+			var nrPillars = 12;
+			var slice = 2 * Math.PI / nrPillars;
+			for (var i = 0; i < nrPillars; i++) {
+				var angle = slice * i;
+				var x = baseCenterX + ((baseRadius - pillarRadius) * Math.cos(angle));
+				var z = baseCenterZ + ((baseRadius - pillarRadius) * Math.sin(angle));
+				var pillar = new THREE.Mesh(
+					new THREE.CylinderGeometry(pillarRadius, pillarRadius, 80, 32),
+					new THREE.MeshBasicMaterial({
+						color: tholosColor
+					})
+				);
+				pillar.translateX(x);
+				pillar.translateZ(z);
+				scene.add(pillar);
+			}
+
+			// add roof
+			var tholosRoof = new THREE.Mesh(
+                new THREE.CylinderGeometry(baseRadius, baseRadius,5, 32),
+                new THREE.MeshBasicMaterial({
+                    color: tholosColor
+                })
+            );
+            tholosRoof.translateX(baseCenterX);
+            tholosRoof.translateY(40);
+            tholosRoof.translateZ(baseCenterZ);
+            scene.add(tholosRoof);
+
+			var avoidMargin = 1.5;
+			return new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
+							new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius)));
+		}
+
+
+        function addTree(scene, avoidBox) {
             var xPos = (Math.random() * 200) - 100; // between -100 and 100
             var zPos = (Math.random() * 200) - 100; // between -100 and 100
+			while (xPos > avoidBox.min.x && xPos < avoidBox.max.x && zPos > avoidBox.min.y && zPos < avoidBox.max.y) {
+				xPos = (Math.random() * 200) - 100; // between -100 and 100
+				zPos = (Math.random() * 200) - 100; // between -100 and 100
+			}
 
             var trunkRadius = Math.random() * 5;
             var trunkHeight = Math.random() * 75;

@@ -86,10 +86,11 @@
             var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
             scene.add(light);
 
-            // ground
+            // ground 1
             
             var texture = THREE.ImageUtils.loadTexture(
-                'textures/patterns/checker.png'
+                // 'textures/patterns/checker.png'
+                'textures/patterns/grasslight-big.jpg'
             );
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
@@ -109,8 +110,28 @@
             mesh.rotation.x = -Math.PI / 2;
             scene.add(mesh);
 
+/*
 
-            // ground
+			var textureUrl	= 'textures/patterns/grasslight-small.jpg';
+			var texture	= THREE.ImageUtils.loadTexture(textureUrl);
+			texture.wrapS	= THREE.RepeatWrapping;
+			texture.wrapT	= THREE.RepeatWrapping;
+			texture.repeat.x= 10;
+			texture.repeat.y= 10;
+			texture.anisotropy = renderer.getMaxAnisotropy();
+
+			// build object3d
+			var geometry	= new THREE.PlaneGeometry(20, 20);
+			var material	= new THREE.MeshPhongMaterial({
+				map	: texture,
+				emissive: 'green',
+			});
+			var object3d	= new THREE.Mesh(geometry, material);
+			object3d.rotateX(-Math.PI/2);
+			scene.add(object3d);;
+*/
+
+            // ground 3
             /*
             var groundTexture = THREE.ImageUtils.loadTexture("textures/patterns/grasslight-big.jpg");
             groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;

@@ -29,7 +29,7 @@
     <script type="text/javascript" src="js/DeviceOrientationControls.js"></script>
     <script type="text/javascript" src="js/OrbitControls.js"></script>
 	<script type="text/javascript" src="js/FirstPersonControls.js"></script>
-	<script type="text/javascript" src="js/ThreeCSG.js"></script>
+	<script type="text/javascript" src="js/LookDownSwitch.js"></script>
 
     <script>
 		"use strict";
@@ -99,6 +99,8 @@
             scene.add(mesh);
 
             createForest(scene);
+
+			LookDownSwitch.create(scene);
 
             window.addEventListener('resize', resize, false);
             setTimeout(resize, 1);

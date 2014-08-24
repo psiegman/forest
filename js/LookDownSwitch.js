@@ -115,18 +115,14 @@ var LookDownSwitch = (function () {
             scene.remove(highlight);
             scene.remove(buttonStates[currentButtonState].button);
         } else if (currentDisplayState === DisplayState.HIGHLIGHT) {
-            console.log("highlight button state:" + currentButtonState);
             scene.add(highlight);
             scene.add(buttonStates[currentButtonState].button);
         } else if (currentDisplayState === DisplayState.TRIGGER) {
             scene.add(highlight);
-            console.log("old button state:" + currentButtonState);
             scene.remove(buttonStates[currentButtonState].button);
             if (++currentButtonState >= buttonStates.length) {
                 currentButtonState = 0;
             }
-            console.log("new button state:" + currentButtonState);
-            console.log("new button color:" + buttonStates[currentButtonState].buttonColor);
             scene.add(buttonStates[currentButtonState].button);
         }
     }

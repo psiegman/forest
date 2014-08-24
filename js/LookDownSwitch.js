@@ -21,8 +21,9 @@ var LookDownSwitch = (function () {
     var currentDisplayState = DisplayState.NONE;
     var scene;
     var highlight;
-
-
+    var camera;
+    var buttonStates = [];
+/*
     var buttonStates = [
         {
             buttonColor: 0xff0000,
@@ -37,7 +38,7 @@ var LookDownSwitch = (function () {
             }
   }
  ];
-
+*/
     var currentButtonState = 0;
     var buttonRadius = 10;
     var highlightAngle = 25;
@@ -117,13 +118,23 @@ var LookDownSwitch = (function () {
         } else if (currentDisplayState === DisplayState.HIGHLIGHT) {
             scene.add(highlight);
             scene.add(buttonStates[currentButtonState].button);
+            highlight.position.x = camera.position.x;
+            highlight.position.z = camera.position.z;
+            buttonStates[currentButtonState].button.position.x = camera.position.x;
+            buttonStates[currentButtonState].button.position.z = camera.position.z;
         } else if (currentDisplayState === DisplayState.TRIGGER) {
             scene.add(highlight);
             scene.remove(buttonStates[currentButtonState].button);
             if (++currentButtonState >= buttonStates.length) {
                 currentButtonState = 0;
             }
-            scene.add(buttonStates[currentButtonState].button);
+            var buttonState = buttonStates[currentButtonState]
+            scene.add(buttonState.button);
+            highlight.position.x = camera.position.x;
+            highlight.position.z = camera.position.z;
+            buttonStates[currentButtonState].button.position.x = camera.position.x;
+            buttonStates[currentButtonState].button.position.z = camera.position.z;
+            buttonState.callback();
         }
     }
 
@@ -133,7 +144,7 @@ var LookDownSwitch = (function () {
     }
 
 
-    pub.create = function (theScene) {
+    pub.create = function (theScene, theCamera, theButtonStates) {
         if (window.DeviceOrientationEvent) {
             console.log("DeviceOrientation is supported");
         } else {
@@ -144,6 +155,8 @@ var LookDownSwitch = (function () {
             window.addEventListener('deviceorientation', handleDeviceOrientation, false);
         }
 
+        camera = theCamera;
+        buttonStates = theButtonStates;
         for (var i = 0; i < buttonStates.length; i++) {
             var buttonState = buttonStates[i];
             buttonState.button = createButton(buttonState.buttonColor);

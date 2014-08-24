@@ -39,9 +39,21 @@
         var element, container;
 
         var clock = new THREE.Clock();
+        var speed = 7; // grid units per second
+        var isMoving = true;
 
         init();
         animate();
+
+        function startMoving() {
+            console.log("start moving");
+            isMoving = true;
+        }
+
+        function stopMoving() {
+            console.log("stop moving");
+            isMoving = false;
+        }
 
         function init() {
             scene = new THREE.Scene();
@@ -101,10 +113,17 @@
 
             Forest.createForest(scene);
 
-			LookDownSwitch.create(scene);
+			LookDownSwitch.create(scene, camera, [{buttonColor: 0x00c000, callback: startMoving}, {buttonColor: 0xff0000, callback: stopMoving}]);
 
             window.addEventListener('resize', resize, false);
             setTimeout(resize, 1);
+        }
+
+
+        function cameraOrientation(camera) {
+            var vector = new THREE.Vector3(0, 0, -1);
+            vector.applyEuler(camera.rotation, camera.rotation.order);
+            return vector;
         }
 
         function resize() {
@@ -118,9 +137,31 @@
             effect.setSize(width, height);
         }
 
+        // the amount to move in the X and Z direction
+        function calculateMove2D(dt) {
+            var distanceSinceLastUpdate = speed * dt;
+            var cameraVector = new THREE.Vector3( 0, 0, -1 );
+            cameraVector.applyQuaternion( camera.quaternion );
+            var q = cameraVector.x / cameraVector.y;
+            var dY = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(q, 2)))
+            var dX = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(1.0/q, 2)))
+            if (cameraVector.x < 0) {
+                dX = -dX;
+            }
+            if (cameraVector.y < 0) {
+                dY = -dY;
+            }
+//            console.log("distance:" + distanceSinceLastUpdate + ", camera x:" + cameraVector.x + ", cameraY:" + cameraVector.y + ", dX:" + dX + ", dY:" + dY);
+            return new THREE.Vector2(dX, dY);
+        }
+
         function update(dt) {
             resize();
-
+            if (isMoving) {
+                var xyMove = calculateMove2D(dt);
+                camera.position.x = camera.position.x + xyMove.x;
+                camera.position.z = camera.position.z + xyMove.y;
+            }
             camera.updateProjectionMatrix();
 
             controls.update(dt);

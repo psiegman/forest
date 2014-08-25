@@ -1,7 +1,6 @@
 var Forest = (function () {
     "use strict";
     var pub = {};
-	var avoidAreas = [];
 
     function createTholos() {
 		var tholos = new THREE.Object3D();
@@ -53,14 +52,14 @@ var Forest = (function () {
         tholos.add(tholosRoof);
 
         var avoidMargin = 1.5;
-		avoidAreas.push(new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
-            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius))));
+		var avoidAreas = [new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
+            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius)))];
 
-		return tholos;
+		return [tholos, avoidAreas];
     }
 
 
-	function isInAvoidArea(xPos, zPos) {
+	function isInAvoidArea(xPos, zPos, avoidAreas) {
 		for(var i = 0; i < avoidAreas.length; i++) {
 			var avoidArea = avoidAreas[i];
         	if (xPos > avoidArea.min.x && xPos < avoidArea.max.x && zPos > avoidArea.min.y && zPos < avoidArea.max.y) {
@@ -70,12 +69,12 @@ var Forest = (function () {
 		return false;
 	}
 
-    function createTree() {
+    function createTree(avoidAreas) {
 		var tree = new THREE.Object3D();
 
         var xPos = (Math.random() * 200) - 100; // between -100 and 100
         var zPos = (Math.random() * 200) - 100; // between -100 and 100
-        while (isInAvoidArea(xPos, zPos)) {
+        while (isInAvoidArea(xPos, zPos, avoidAreas)) {
             xPos = (Math.random() * 200) - 100; // between -100 and 100
             zPos = (Math.random() * 200) - 100; // between -100 and 100
         }
@@ -114,9 +113,11 @@ var Forest = (function () {
 
     pub.createForest = function () {
 		var forest = new THREE.Object3D();
-        forest.add(createTholos());
+		var tholosConstruction = createTholos();
+		scene.add(tholosConstruction[0]);
+		var avoidAreas = tholosConstruction[1];
         for (var i = 0; i < 50; i++) {
-            forest.add(createTree());
+            forest.add(createTree(avoidAreas));
         }
 		return forest;
     }

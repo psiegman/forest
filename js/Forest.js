@@ -1,8 +1,11 @@
 var Forest = (function () {
     "use strict";
     var pub = {};
+	var avoidAreas = [];
 
-    function createTholos(scene) {
+    function createTholos() {
+		var tholos = new THREE.Object3D();
+
         // add base
         var baseRadius = 30;
         var baseCenterX = 65;
@@ -16,7 +19,7 @@ var Forest = (function () {
         );
         tholosBase.translateX(baseCenterX);
         tholosBase.translateZ(baseCenterZ);
-        scene.add(tholosBase);
+        tholos.add(tholosBase);
 
         // add pillars
         var pillarRadius = 2;
@@ -34,7 +37,7 @@ var Forest = (function () {
             );
             pillar.translateX(x);
             pillar.translateZ(z);
-            scene.add(pillar);
+            tholos.add(pillar);
         }
 
         // add roof
@@ -47,18 +50,32 @@ var Forest = (function () {
         tholosRoof.translateX(baseCenterX);
         tholosRoof.translateY(40);
         tholosRoof.translateZ(baseCenterZ);
-        scene.add(tholosRoof);
+        tholos.add(tholosRoof);
 
         var avoidMargin = 1.5;
-        return new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
-            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius)));
+		avoidAreas.push(new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
+            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius))));
+
+		return tholos;
     }
 
 
-    function addTree(scene, avoidBox) {
+	function isInAvoidArea(xPos, zPos) {
+		for(var i = 0; i < avoidAreas.length; i++) {
+			var avoidArea = avoidAreas[i];
+        	if (xPos > avoidArea.min.x && xPos < avoidArea.max.x && zPos > avoidArea.min.y && zPos < avoidArea.max.y) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+    function createTree() {
+		var tree = new THREE.Object3D();
+
         var xPos = (Math.random() * 200) - 100; // between -100 and 100
         var zPos = (Math.random() * 200) - 100; // between -100 and 100
-        while (xPos > avoidBox.min.x && xPos < avoidBox.max.x && zPos > avoidBox.min.y && zPos < avoidBox.max.y) {
+        while (isInAvoidArea(xPos, zPos)) {
             xPos = (Math.random() * 200) - 100; // between -100 and 100
             zPos = (Math.random() * 200) - 100; // between -100 and 100
         }
@@ -73,7 +90,7 @@ var Forest = (function () {
         );
         treeTrunk.translateX(xPos);
         treeTrunk.translateZ(zPos);
-        scene.add(treeTrunk);
+        tree.add(treeTrunk);
 
         var treeHeadRadius = (trunkRadius * 2) + (Math.random() * 15);
         var treeHead = new THREE.Mesh(
@@ -91,14 +108,17 @@ var Forest = (function () {
 
         treeHead.translateY((0.5 * trunkHeight) + (treeHeadRadius - treeHeadSink));
         treeHead.translateZ(zPos);
-        scene.add(treeHead);
+        tree.add(treeHead);
+		return tree;
     }
 
-    pub.createForest = function (scene) {
-        var tholosBox = createTholos(scene);
+    pub.createForest = function () {
+		var forest = new THREE.Object3D();
+        forest.add(createTholos());
         for (var i = 0; i < 50; i++) {
-            addTree(scene, tholosBox);
+            forest.add(createTree());
         }
+		return forest;
     }
 
 

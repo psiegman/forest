@@ -109,7 +109,7 @@
             mesh.rotation.x = -Math.PI / 2;
             scene.add(mesh);
 
-            Forest.createForest(scene);
+			scene.add(Forest.createForest());
 
 			LookDownSwitch.create(scene, camera, [{buttonColor: 0x00c000, callback: startMoving}, {buttonColor: 0xff0000, callback: stopMoving}]);
 

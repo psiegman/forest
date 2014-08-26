@@ -59,14 +59,14 @@
             scene.fog = new THREE.FogExp2(0xc0c0f0, 0.015);
 
 
-                    // create a render and set the size
-        renderer = new THREE.WebGLRenderer();
+            // create a render and set the size
+            renderer = new THREE.WebGLRenderer();
 
-        renderer.setClearColor(new THREE.Color(0xc0c0ff, 1.0));
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMapEnabled = true;
+            renderer.setClearColor(new THREE.Color(0xc0c0ff, 1.0));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMapEnabled = true;
 
-/*
+            /*
             renderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xc0c0f0, 1);
             // renderer.setClearColor(scene.fog.color);
@@ -78,29 +78,32 @@
             effect = new THREE.StereoEffect(renderer);
 
 
-        // create the ground plane
-        var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
-        var planeMaterial = new THREE.MeshLambertMaterial({color: 0x00c000, ambient: 0x00c000});
-        var planxeMaterial = new THREE.MeshPhongMaterial({
+            // create the ground plane
+            var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
+            var planeMaterial = new THREE.MeshLambertMaterial({
+                color: 0x00c000,
+                ambient: 0x00c000
+            });
+            var planxeMaterial = new THREE.MeshPhongMaterial({
                 color: 0x0fff0f,
                 specular: 0x0fff0f,
                 shininess: 20,
                 shading: THREE.SmoothShading,
                 // map: texture
             });
-        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.receiveShadow = true;
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.receiveShadow = true;
 
-        // rotate and position the plane
-        plane.rotation.x = -0.5 * Math.PI;
-        plane.position.x = 15
-        plane.position.y = 0
-        plane.position.z = 0
+            // rotate and position the plane
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.x = 15
+            plane.position.y = 0
+            plane.position.z = 0
 
-        // add the plane to the scene
-        scene.add(plane);
+            // add the plane to the scene
+            scene.add(plane);
 
-/*
+            /*
             // ground 1
             var material = new THREE.MeshPhongMaterial({
                 color: 0xffffff,

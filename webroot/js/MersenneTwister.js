@@ -65,7 +65,8 @@
 */
 
 var MersenneTwister = function (seed) {
-    if (seed == undefined) {
+    "use strict";
+    if (seed === undefined) {
         seed = new Date().getTime();
     }
     /* Period parameters */
@@ -79,13 +80,13 @@ var MersenneTwister = function (seed) {
     this.mti = this.N + 1; /* mti==N+1 means mt[N] is not initialized */
 
     this.init_genrand(seed);
-}
+};
 
 /* initializes mt[N] with a seed */
 MersenneTwister.prototype.init_genrand = function (s) {
     this.mt[0] = s >>> 0;
     for (this.mti = 1; this.mti < this.N; this.mti++) {
-        var s = this.mt[this.mti - 1] ^ (this.mt[this.mti - 1] >>> 30);
+        s = this.mt[this.mti - 1] ^ (this.mt[this.mti - 1] >>> 30);
         this.mt[this.mti] = (((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253) + this.mti;
         /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
         /* In the previous versions, MSBs of the seed affect   */
@@ -94,7 +95,7 @@ MersenneTwister.prototype.init_genrand = function (s) {
         this.mt[this.mti] >>>= 0;
         /* for >32 bit machines */
     }
-}
+};
 
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
@@ -141,7 +142,7 @@ MersenneTwister.prototype.genrand_int32 = function () {
     if (this.mti >= this.N) { /* generate N words at one time */
         var kk;
 
-        if (this.mti == this.N + 1) /* if init_genrand() has not been called, */
+        if (this.mti === this.N + 1) /* if init_genrand() has not been called, */
             this.init_genrand(5489); /* a default initial seed is used */
 
         for (kk = 0; kk < this.N - this.M; kk++) {

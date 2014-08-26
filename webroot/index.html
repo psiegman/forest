@@ -28,12 +28,12 @@
     <script type="text/javascript" src="js/StereoEffect.js"></script>
     <script type="text/javascript" src="js/DeviceOrientationControls.js"></script>
     <script type="text/javascript" src="js/OrbitControls.js"></script>
-	<script type="text/javascript" src="js/FirstPersonControls.js"></script>
-	<script type="text/javascript" src="js/LookDownSwitch.js"></script>
-	<script type="text/javascript" src="js/Forest.js"></script>
+    <script type="text/javascript" src="js/FirstPersonControls.js"></script>
+    <script type="text/javascript" src="js/LookDownSwitch.js"></script>
+    <script type="text/javascript" src="js/Forest.js"></script>
 
     <script>
-		"use strict";
+        "use strict";
         var camera, scene, renderer;
         var effect, controls;
         var element, container;
@@ -55,12 +55,22 @@
 
         function init() {
             scene = new THREE.Scene();
-           //  scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
-			scene.fog=new THREE.FogExp2( 0xc0c0f0, 0.015 );
+            //  scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
+            scene.fog = new THREE.FogExp2(0xc0c0f0, 0.015);
 
+
+                    // create a render and set the size
+        renderer = new THREE.WebGLRenderer();
+
+        renderer.setClearColor(new THREE.Color(0xc0c0ff, 1.0));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+
+/*
             renderer = new THREE.WebGLRenderer();
-            renderer.setClearColor( 0xc0c0f0, 1);
+            renderer.setClearColor(0xc0c0f0, 1);
             // renderer.setClearColor(scene.fog.color);
+            */
             element = renderer.domElement;
             container = document.getElementById('example');
             container.appendChild(element);
@@ -68,33 +78,29 @@
             effect = new THREE.StereoEffect(renderer);
 
 
-            camera = new THREE.PerspectiveCamera(120, 1, 0.001, 700);
-            camera.position.set(0, 10, 0);
-            scene.add(camera);
+        // create the ground plane
+        var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0x00c000, ambient: 0x00c000});
+        var planxeMaterial = new THREE.MeshPhongMaterial({
+                color: 0x0fff0f,
+                specular: 0x0fff0f,
+                shininess: 20,
+                shading: THREE.SmoothShading,
+                // map: texture
+            });
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
 
-			// controls
-			if (has.mobile) {
-                controls = new THREE.DeviceOrientationControls(camera, true);
-                controls.connect();
-                controls.update();
-				element.addEventListener('click', fullscreen, false);
-			} else {
-				controls = new THREE.OrbitControls(camera, element);
-				controls.rotateUp(Math.PI / 4);
-				controls.target.set(
-					camera.position.x + 0.1,
-					camera.position.y,
-					camera.position.z
-				);
-				controls.noZoom = true;
-				controls.noPan = true;
-				controls.autoRotate = false;
-			}
+        // rotate and position the plane
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.x = 15
+        plane.position.y = 0
+        plane.position.z = 0
 
-			// lights
-            var light = new THREE.HemisphereLight(0x00ff00, 0x00ff00, 0.6);
-            scene.add(light);
+        // add the plane to the scene
+        scene.add(plane);
 
+/*
             // ground 1
             var material = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
@@ -103,15 +109,66 @@
                 shading: THREE.FlatShading,
                 // map: texture
             });
-            var geometry = new THREE.PlaneGeometry(1000, 1000);
 
+            var geometry = new THREE.PlaneGeometry(1000, 1000);
             var mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
             scene.add(mesh);
 
-			scene.add(Forest.createForest());
 
-			LookDownSwitch.create(scene, camera, [{buttonColor: 0x00c000, callback: startMoving}, {buttonColor: 0xff0000, callback: stopMoving}]);
+*/
+
+
+
+
+            camera = new THREE.PerspectiveCamera(120, 1, 0.001, 700);
+            camera.position.set(0, 10, 0);
+            scene.add(camera);
+
+            // controls
+            if (has.mobile) {
+                controls = new THREE.DeviceOrientationControls(camera, true);
+                controls.connect();
+                controls.update();
+                element.addEventListener('click', fullscreen, false);
+            } else {
+                controls = new THREE.OrbitControls(camera, element);
+                controls.rotateUp(Math.PI / 4);
+                controls.target.set(
+                    camera.position.x + 0.1,
+                    camera.position.y,
+                    camera.position.z
+                );
+                controls.noZoom = true;
+                controls.noPan = true;
+                controls.autoRotate = false;
+            }
+
+            // lights
+            // var light = new THREE.HemisphereLight(0x00ff00, 0x00ff00, 0.6);
+            // scene.add(light);
+
+            // add subtle ambient lighting
+            var ambiColor = 0xffffff;
+            var ambientLight = new THREE.AmbientLight(ambiColor);
+            scene.add(ambientLight);
+
+            // add spotlight for the shadows
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(-400, 50, -10);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+
+
+            scene.add(Forest.createForest());
+
+            LookDownSwitch.create(scene, camera, [{
+                buttonColor: 0x00c000,
+                callback: startMoving
+            }, {
+                buttonColor: 0xff0000,
+                callback: stopMoving
+            }]);
 
             window.addEventListener('resize', resize, false);
             setTimeout(resize, 1);
@@ -135,21 +192,21 @@
             effect.setSize(width, height);
         }
 
-        // the amount to move in the X and Z direction
+         // the amount to move in the X and Z direction
         function calculateMove2D(dt) {
             var distanceSinceLastUpdate = speed * dt;
-            var cameraVector = new THREE.Vector3( 0, 0, -1 );
-            cameraVector.applyQuaternion( camera.quaternion );
+            var cameraVector = new THREE.Vector3(0, 0, -1);
+            cameraVector.applyQuaternion(camera.quaternion);
             var q = cameraVector.x / cameraVector.y;
             var dY = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(q, 2)))
-            var dX = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(1.0/q, 2)))
+            var dX = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(1.0 / q, 2)))
             if (cameraVector.x < 0) {
                 dX = -dX;
             }
             if (cameraVector.y < 0) {
                 dY = -dY;
             }
-//            console.log("distance:" + distanceSinceLastUpdate + ", camera x:" + cameraVector.x + ", cameraY:" + cameraVector.y + ", dX:" + dX + ", dY:" + dY);
+            //            console.log("distance:" + distanceSinceLastUpdate + ", camera x:" + cameraVector.x + ", cameraY:" + cameraVector.y + ", dX:" + dX + ", dY:" + dY);
             return new THREE.Vector2(dX, dY);
         }
 

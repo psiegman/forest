@@ -1,12 +1,45 @@
 var Forest = (function () {
     "use strict";
-    var pub = {};
+    var api = {};
+
+    function normal_random(mean, variance) {
+        mean = mean || 0.0;
+        variance = variance || 1.0;
+        var V1, V2, S;
+        do {
+            var U1 = Math.random();
+            var U2 = Math.random();
+            V1 = 2 * U1 - 1;
+            V2 = 2 * U2 - 1;
+            S = V1 * V1 + V2 * V2;
+        } while (S > 1);
+
+        var X = Math.sqrt(-2 * Math.log(S) / S) * V1;
+        //  Y = Math.sqrt(-2 * Math.log(S) / S) * V2;
+        X = mean + Math.sqrt(variance) * X;
+        //  Y = mean + Math.sqrt(variance) * Y ;
+        return X;
+    }
+
+    /*
+     *  normRand: returns normally distributed random numbers
+     */
+    function normRand() {
+        var x1, x2, rad;
+        do {
+            x1 = 2 * Math.random() - 1;
+            x2 = 2 * Math.random() - 1;
+            rad = x1 * x1 + x2 * x2;
+        } while (rad >= 1 || rad === 0);
+        var c = Math.sqrt(-2 * Math.log(rad) / rad);
+        return x1 * c;
+    }
 
     /**
      * Creates a Tholos (round greek temple).
      * @return an array containing the create tholos as an THREE.Object3D and an array of THREE.vector2D of areas to avoid by trees and such.
      */
-    function createTholos() {
+    function createTholos(areasToAvoid) {
         var tholos = new THREE.Object3D();
 
         // add base
@@ -20,8 +53,8 @@ var Forest = (function () {
             ambient: 0xf0f0f0,
 
         });
-//         var material = new THREE.MeshLambertMaterial({color: 0x7777ff});
-//        		 var material = new THREE.MeshPhongMaterial( { ambient: 0xf0f0f0, color: 0xf0f0f0, specular: 0x000000, shininess: 1, shading: THREE.FlatShading } );
+        //         var material = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        //var material = new THREE.MeshPhongMaterial( { ambient: 0xf0f0f0, color: 0xf0f0f0, specular: 0x000000, shininess: 1, shading: THREE.FlatShading } );
 
         var nrSteps = 3;
         var stepHeight = 2;
@@ -42,15 +75,17 @@ var Forest = (function () {
         var pillarRadius = 2;
         var nrPillars = 12;
         var slice = 2 * Math.PI / nrPillars;
+        var pillarHeight = 40;
         for (var i = 0; i < nrPillars; i++) {
             var angle = slice * i;
             var x = baseCenterX + ((baseRadius - pillarRadius) * Math.cos(angle));
             var z = baseCenterZ + ((baseRadius - pillarRadius) * Math.sin(angle));
             var pillar = new THREE.Mesh(
-                new THREE.CylinderGeometry(pillarRadius, pillarRadius, 80, 32),
+                new THREE.CylinderGeometry(pillarRadius, pillarRadius, pillarHeight, 32),
                 material
             );
             pillar.translateX(x);
+            pillar.translateY(pillarHeight / 2);
             pillar.translateZ(z);
             tholos.add(pillar);
         }
@@ -66,14 +101,14 @@ var Forest = (function () {
         tholos.add(tholosRoof);
 
         var avoidMargin = 1.5;
-        var avoidAreas = [new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
-            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius)))];
+        areasToAvoid.push(new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
+            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius))));
 
-        return [tholos, avoidAreas];
+        return tholos;
     }
 
     function createTrunkColor() {
-        var h = ((Math.random() * 10.0) + 40.0)/360.0;
+        var h = ((Math.random() * 10.0) + 40.0) / 360.0;
         var s = ((Math.random() * 10.0) + 90.0) / 100.0;
         var v = ((Math.random() * 15.0) + 15.0) / 100.0;
 
@@ -83,7 +118,7 @@ var Forest = (function () {
     }
 
     function createLeafColor() {
-        var h = 120.0/360.0;
+        var h = 120.0 / 360.0;
         var s = ((Math.random() * 40) + 60) / 100.0;
         var v = ((Math.random() * 60)) / 100.0;
 
@@ -113,49 +148,55 @@ var Forest = (function () {
             zPos = (Math.random() * 200) - 100; // between -100 and 100
         }
 
-        var trunkRadius = Math.random() * 5;
-        var trunkHeight = Math.random() * 75;
+        var maxTrunkRadius = 5;
+        var trunkRadius = Math.random() * maxTrunkRadius;
+        var trunkHeight = (4 * trunkRadius) + (Math.random() * (40 - (4 * maxTrunkRadius)));
+        var color = createTrunkColor();
+        var trunkMaterial = new THREE.MeshLambertMaterial({
+            color: color,
+            ambient: createTrunkColor()
+        });
         var treeTrunk = new THREE.Mesh(
             new THREE.CylinderGeometry(trunkRadius, trunkRadius, trunkHeight, 32),
-            new THREE.MeshBasicMaterial({
-                color: createTrunkColor() // 0x492a00
-            })
+            trunkMaterial
         );
         treeTrunk.translateX(xPos);
+        treeTrunk.translateY(trunkHeight / 2);
         treeTrunk.translateZ(zPos);
         tree.add(treeTrunk);
 
-        var treeHeadRadius = (trunkRadius * 2) + (Math.random() * 15);
-        var treeHead = new THREE.Mesh(
-            new THREE.SphereGeometry(treeHeadRadius, 32, 32),
-            new THREE.MeshBasicMaterial({
-                color: createLeafColor(), // 0x2bcd00,
-                opacity: 0.98,
-                transparent: true
-            })
+        var treeCrownRadius = (trunkHeight + normRand()) / 2;
+        var leafMaterial = new THREE.MeshBasicMaterial({
+            color: createLeafColor(),
+            opacity: 0.98,
+            transparent: true
+        })
+        var treeCrown = new THREE.Mesh(
+            new THREE.SphereGeometry(treeCrownRadius, 32, 32),
+            leafMaterial
         );
-        treeHead.translateX(xPos);
+        treeCrown.translateX(xPos);
 
-        // the amount the treeHead sphere should sink into the trunk to match rim of the trunk with the sphere
-        var treeHeadSink = treeHeadRadius - Math.sqrt(Math.pow(treeHeadRadius, 2) - Math.pow(trunkRadius, 2));
+        // the amount the treeCrown sphere should sink into the trunk to match rim of the trunk with the sphere
+        var treeCrownSink = treeCrownRadius - Math.sqrt(Math.pow(treeCrownRadius, 2) - Math.pow(trunkRadius, 2));
 
-        treeHead.translateY((0.5 * trunkHeight) + (treeHeadRadius - treeHeadSink));
-        treeHead.translateZ(zPos);
-        tree.add(treeHead);
+        treeCrown.translateY(trunkHeight + (treeCrownRadius - treeCrownSink));
+        treeCrown.translateZ(zPos);
+        tree.add(treeCrown);
         return tree;
     }
 
-    pub.createForest = function () {
+    api.createForest = function () {
         var forest = new THREE.Object3D();
-        var tholosConstruction = createTholos();
-        scene.add(tholosConstruction[0]);
-        var avoidAreas = tholosConstruction[1];
+        var areasToAvoid = [];
+        forest.add(createTholos(areasToAvoid));
         for (var i = 0; i < 50; i++) {
-            forest.add(createTree(avoidAreas));
+            forest.add(createTree(areasToAvoid));
         }
+        forest.castShadow = true;
+        forest.receiveShadow = true;
         return forest;
     }
 
-
-    return pub;
+    return api;
 })();

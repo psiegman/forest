@@ -1,6 +1,7 @@
 var Forest = (function () {
     "use strict";
     var api = {};
+    var nrSegments = 32;
 
     function normal_random(mean, variance) {
         mean = mean || 0.0;
@@ -44,8 +45,6 @@ var Forest = (function () {
 
         // add base
         var baseRadius = 30;
-        var baseCenterX = 65;
-        var baseCenterZ = 10;
 
         //        var material = new THREE.MeshBasicMaterial({color: 0xf0f0f0, shading:  THREE.FlatShading});
         var material = new THREE.MeshLambertMaterial({
@@ -62,11 +61,9 @@ var Forest = (function () {
         for (var i = 0; i < nrSteps; i++) {
             var radius = baseRadius + (stepWidth * (nrSteps - i));
             var tholosBase = new THREE.Mesh(
-                new THREE.CylinderGeometry(radius, radius, stepHeight, 32),
+                new THREE.CylinderGeometry(radius, radius, stepHeight, nrSegments),
                 material
             );
-            tholosBase.translateX(baseCenterX);
-            tholosBase.translateZ(baseCenterZ);
             tholosBase.translateY((stepHeight * i) + (stepHeight * 0.5));
             tholos.add(tholosBase);
         }
@@ -78,8 +75,8 @@ var Forest = (function () {
         var pillarHeight = 40;
         for (var i = 0; i < nrPillars; i++) {
             var angle = slice * i;
-            var x = baseCenterX + ((baseRadius - pillarRadius) * Math.cos(angle));
-            var z = baseCenterZ + ((baseRadius - pillarRadius) * Math.sin(angle));
+            var x = (baseRadius - pillarRadius) * Math.cos(angle);
+            var z = (baseRadius - pillarRadius) * Math.sin(angle);
             var pillar = new THREE.Mesh(
                 new THREE.CylinderGeometry(pillarRadius, pillarRadius, pillarHeight, 32),
                 material
@@ -91,18 +88,32 @@ var Forest = (function () {
         }
 
         // add roof
-        var tholosRoof = new THREE.Mesh(
-            new THREE.CylinderGeometry(baseRadius, baseRadius, 2, 32),
-            material
-        );
-        tholosRoof.translateX(baseCenterX);
+    	var roofSphereGeometry = new THREE.SphereGeometry(baseRadius, nrSegments, nrSegments);
+		var roofSphereMesh = new THREE.Mesh(roofSphereGeometry);
+		var roofSphereBSP = new ThreeBSP(roofSphereMesh);
+
+        var roofCutoffBoxGeometry = new THREE.BoxGeometry(2 * baseRadius, 2* baseRadius, 2 * baseRadius);
+        var roofCutoffBoxMesh = new THREE.Mesh(roofCutoffBoxGeometry);
+		roofCutoffBoxMesh.position.y = -baseRadius;
+		var roofCutoffBoxBSP = new ThreeBSP(roofCutoffBoxMesh);
+
+        var subtract_bsp = roofSphereBSP.subtract(roofCutoffBoxBSP);
+		var tholosRoof = subtract_bsp.toMesh( new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading}));
+//		var tholosRoof = subtract_bsp.toMesh( new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading, map: THREE.ImageUtils.loadTexture('texture.png') }) );
+		tholosRoof.geometry.computeVertexNormals();
+
         tholosRoof.translateY(40);
-        tholosRoof.translateZ(baseCenterZ);
         tholos.add(tholosRoof);
 
+        var tholosX = 65;
+        var tholosZ = 40;
+
+        tholos.translateX(tholosX);
+        tholos.translateZ(tholosZ);
+
         var avoidMargin = 1.5;
-        areasToAvoid.push(new THREE.Box2(new THREE.Vector2(baseCenterX - (avoidMargin * baseRadius), baseCenterZ - (avoidMargin * baseRadius)),
-            new THREE.Vector2(baseCenterX + (avoidMargin * baseRadius), baseCenterZ + (avoidMargin * baseRadius))));
+        areasToAvoid.push(new THREE.Box2(new THREE.Vector2(tholosX - (avoidMargin * baseRadius), tholosZ - (avoidMargin * baseRadius)),
+            new THREE.Vector2(tholosX + (avoidMargin * baseRadius), tholosZ + (avoidMargin * baseRadius))));
 
         return tholos;
     }
@@ -151,9 +162,8 @@ var Forest = (function () {
         var maxTrunkRadius = 5;
         var trunkRadius = Math.random() * maxTrunkRadius;
         var trunkHeight = (4 * trunkRadius) + (Math.random() * (40 - (4 * maxTrunkRadius)));
-        var color = createTrunkColor();
         var trunkMaterial = new THREE.MeshLambertMaterial({
-            color: color,
+            color: createTrunkColor(),
             ambient: createTrunkColor()
         });
         var treeTrunk = new THREE.Mesh(
@@ -166,8 +176,9 @@ var Forest = (function () {
         tree.add(treeTrunk);
 
         var treeCrownRadius = (trunkHeight + normRand()) / 2;
-        var leafMaterial = new THREE.MeshBasicMaterial({
+        var leafMaterial = new THREE.MeshLambertMaterial({
             color: createLeafColor(),
+            ambient: createLeafColor(),
             opacity: 0.98,
             transparent: true
         })

@@ -36,6 +36,16 @@ var Forest = (function () {
         return x1 * c;
     }
 
+    /**
+     * Subtracts one or more THREE.Geometries from a source THREE.Geometry.
+     *
+     * Expects a list of arguments as follows:
+     * arguments[0]: the source THREE.Geometry
+     * arguments[i]: a THREE.Geometry that will be subtracted from the source geometry
+     * arguments[i+1]: a THREE.Vector3 that will be used to translate the subtract mesh before the subtract operation
+     *
+     * @return a ThreeBSP.node
+     */
     function subtract(varargs) {
 		var mesh1 = new THREE.Mesh(arguments[0]);
 
@@ -109,8 +119,8 @@ var Forest = (function () {
         var roofBsp = subtract(new THREE.SphereGeometry(baseRadius, nrSegments, nrSegments),
                                new THREE.BoxGeometry(2 * baseRadius, 2* baseRadius, 2 * baseRadius),
                                new THREE.Vector3(0, -baseRadius, 0),
-                               new THREE.CylinderGeometry(2 * pillarRadius, 2 * pillarRadius, 100, nrSegments),
-                               new THREE.Vector3(0, 0, 0),
+                               new THREE.CylinderGeometry(2 * pillarRadius, 2 * pillarRadius, baseRadius * 2, nrSegments),
+                               new THREE.Vector3(0, baseRadius, 0),
                                new THREE.SphereGeometry(baseRadius - (2 * pillarRadius), nrSegments, nrSegments),
                                new THREE.Vector3(0, 0, 0)
                               );

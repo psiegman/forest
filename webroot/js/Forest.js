@@ -36,6 +36,24 @@ var Forest = (function () {
         return x1 * c;
     }
 
+    function subtract(varargs) {
+		var mesh1 = new THREE.Mesh(arguments[0]);
+
+        var resultBsp = new ThreeBSP(mesh1);
+        for (var i = 1; i < arguments.length; i+= 2) {
+            var mesh2 = new THREE.Mesh(arguments[i]);
+            var translation = arguments[i + 1];
+            mesh2.translateX(translation.x);
+            mesh2.translateY(translation.y);
+            mesh2.translateZ(translation.z);
+            var bsp2 = new ThreeBSP(mesh2);
+
+            resultBsp = resultBsp.subtract(bsp2);
+        }
+        return resultBsp;
+    }
+
+
     /**
      * Creates a Tholos (round greek temple).
      * @return an array containing the create tholos as an THREE.Object3D and an array of THREE.vector2D of areas to avoid by trees and such.
@@ -88,18 +106,16 @@ var Forest = (function () {
         }
 
         // add roof
-    	var roofSphereGeometry = new THREE.SphereGeometry(baseRadius, nrSegments, nrSegments);
-		var roofSphereMesh = new THREE.Mesh(roofSphereGeometry);
-		var roofSphereBSP = new ThreeBSP(roofSphereMesh);
+        var roofBsp = subtract(new THREE.SphereGeometry(baseRadius, nrSegments, nrSegments),
+                               new THREE.BoxGeometry(2 * baseRadius, 2* baseRadius, 2 * baseRadius),
+                               new THREE.Vector3(0, -baseRadius, 0),
+                               new THREE.CylinderGeometry(2 * pillarRadius, 2 * pillarRadius, 100, nrSegments),
+                               new THREE.Vector3(0, 0, 0),
+                               new THREE.SphereGeometry(baseRadius - (2 * pillarRadius), nrSegments, nrSegments),
+                               new THREE.Vector3(0, 0, 0)
+                              );
 
-        var roofCutoffBoxGeometry = new THREE.BoxGeometry(2 * baseRadius, 2* baseRadius, 2 * baseRadius);
-        var roofCutoffBoxMesh = new THREE.Mesh(roofCutoffBoxGeometry);
-		roofCutoffBoxMesh.position.y = -baseRadius;
-		var roofCutoffBoxBSP = new ThreeBSP(roofCutoffBoxMesh);
-
-        var subtract_bsp = roofSphereBSP.subtract(roofCutoffBoxBSP);
-		var tholosRoof = subtract_bsp.toMesh( new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading}));
-//		var tholosRoof = subtract_bsp.toMesh( new THREE.MeshLambertMaterial({ shading: THREE.SmoothShading, map: THREE.ImageUtils.loadTexture('texture.png') }) );
+        var tholosRoof = roofBsp.toMesh(material);
 		tholosRoof.geometry.computeVertexNormals();
 
         tholosRoof.translateY(40);

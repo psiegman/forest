@@ -24,6 +24,7 @@
     <div id="example"></div>
 
     <script type="text/javascript" src="js/three.min.js"></script>
+    <script type="text/javascript" src="js/ThreeCSG.js"></script>
     <script type="text/javascript" src="js/has.js"></script>
     <script type="text/javascript" src="js/StereoEffect.js"></script>
     <script type="text/javascript" src="js/DeviceOrientationControls.js"></script>
@@ -34,6 +35,9 @@
 
     <script>
         "use strict";
+        var SCREEN_WIDTH = window.innerWidth;
+        var SCREEN_HEIGHT = window.innerHeight;
+
         var camera, scene, renderer;
         var effect, controls;
         var element, container;
@@ -54,27 +58,29 @@
         }
 
         function init() {
+
+            // CAMERA
+            camera = new THREE.PerspectiveCamera(90, SCREEN_WIDTH / SCREEN_HEIGHT, 0.5, 1000 );
+            camera.position.set(0, 10, 0);
+
+            // SCENE
             scene = new THREE.Scene();
-            //  scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
             scene.fog = new THREE.FogExp2(0xc0c0f0, 0.015);
 
 
-            // create a render and set the size
-            renderer = new THREE.WebGLRenderer();
-
-            renderer.setClearColor(new THREE.Color(0xc0c0ff, 1.0));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMapEnabled = true;
-
-            /*
-            renderer = new THREE.WebGLRenderer();
-            renderer.setClearColor(0xc0c0f0, 1);
-            // renderer.setClearColor(scene.fog.color);
-            */
-            element = renderer.domElement;
+            // RENDERER
             container = document.getElementById('example');
-            container.appendChild(element);
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setClearColor( scene.fog.color, 1 );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.domElement.style.position = "relative";
+            container.appendChild( renderer.domElement );
 
+            renderer.gammaInput = true;
+            renderer.gammaOutput = true;
+
+            element = renderer.domElement;
+            container.appendChild(element);
             effect = new THREE.StereoEffect(renderer);
 
 
@@ -83,13 +89,6 @@
             var planeMaterial = new THREE.MeshLambertMaterial({
                 color: 0x00c000,
                 ambient: 0x00c000
-            });
-            var planxeMaterial = new THREE.MeshPhongMaterial({
-                color: 0x0fff0f,
-                specular: 0x0fff0f,
-                shininess: 20,
-                shading: THREE.SmoothShading,
-                // map: texture
             });
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.receiveShadow = true;
@@ -103,32 +102,7 @@
             // add the plane to the scene
             scene.add(plane);
 
-            /*
-            // ground 1
-            var material = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                specular: 0xffffff,
-                shininess: 20,
-                shading: THREE.FlatShading,
-                // map: texture
-            });
-
-            var geometry = new THREE.PlaneGeometry(1000, 1000);
-            var mesh = new THREE.Mesh(geometry, material);
-            mesh.rotation.x = -Math.PI / 2;
-            scene.add(mesh);
-
-
-*/
-
-
-
-
-            camera = new THREE.PerspectiveCamera(120, 1, 0.001, 700);
-            camera.position.set(0, 10, 0);
-            scene.add(camera);
-
-            // controls
+            // CONTROLS
             if (has.mobile) {
                 controls = new THREE.DeviceOrientationControls(camera, true);
                 controls.connect();
@@ -146,10 +120,6 @@
                 controls.noPan = true;
                 controls.autoRotate = false;
             }
-
-            // lights
-            // var light = new THREE.HemisphereLight(0x00ff00, 0x00ff00, 0.6);
-            // scene.add(light);
 
             // add subtle ambient lighting
             var ambiColor = 0xffffff;

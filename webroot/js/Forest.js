@@ -371,11 +371,14 @@ var Forest = (function () {
     function createTree(avoidAreas) {
         var tree = new THREE.Object3D();
 
-        var xPos = (Math.random() * 200) - 100; // between -100 and 100
-        var zPos = (Math.random() * 200) - 100; // between -100 and 100
+        var forestWidth = 400;
+        var forestBreadth = 400;
+
+        var xPos = (Math.random() * forestWidth) - (forestWidth / 2);
+        var zPos = (Math.random() * forestBreadth) - (forestBreadth / 2);
         while (isInAvoidArea(xPos, zPos, avoidAreas)) {
-            xPos = (Math.random() * 200) - 100; // between -100 and 100
-            zPos = (Math.random() * 200) - 100; // between -100 and 100
+            xPos = (Math.random() * forestWidth) - (forestWidth / 2);
+            zPos = (Math.random() * forestBreadth) - (forestBreadth / 2);
         }
 
         var maxTrunkRadius = 5;
@@ -421,7 +424,7 @@ var Forest = (function () {
         var areasToAvoid = [];
         forest.add(createTholos(areasToAvoid));
         forest.add(createSign(areasToAvoid));
-        for (var i = 0; i < 50; i++) {
+        for (var i = 0; i < 200; i++) {
             forest.add(createTree(areasToAvoid));
         }
         forest.castShadow = true;

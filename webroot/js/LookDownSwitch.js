@@ -10,7 +10,7 @@
  */
 var LookDownSwitch = (function () {
     "use strict";
-    var pub = {};
+    var api = {};
 
     var DisplayState = {
         NONE: 1,
@@ -18,27 +18,11 @@ var LookDownSwitch = (function () {
         TRIGGER: 3
     };
 
+    var buttonMainGroup;
     var currentDisplayState = DisplayState.NONE;
-    var scene;
     var highlight;
     var camera;
     var buttonStates = [];
-/*
-    var buttonStates = [
-        {
-            buttonColor: 0xff0000,
-            callback: new function () {
-                console.log('stand');
-            }
-  },
-        {
-            buttonColor: 0x0000ff,
-            callback: new function () {
-                console.log('walk');
-            }
-  }
- ];
-*/
     var currentButtonState = 0;
     var buttonRadius = 10;
     var highlightAngle = 25;
@@ -113,23 +97,23 @@ var LookDownSwitch = (function () {
         currentDisplayState = newState;
         // remove highlight + button
         if (currentDisplayState === DisplayState.NONE) {
-            scene.remove(highlight);
-            scene.remove(buttonStates[currentButtonState].button);
+            buttonMainGroup.remove(highlight);
+            buttonMainGroup.remove(buttonStates[currentButtonState].button);
         } else if (currentDisplayState === DisplayState.HIGHLIGHT) {
-            scene.add(highlight);
-            scene.add(buttonStates[currentButtonState].button);
+            buttonMainGroup.add(highlight);
+            buttonMainGroup.add(buttonStates[currentButtonState].button);
             highlight.position.x = camera.position.x;
             highlight.position.z = camera.position.z;
             buttonStates[currentButtonState].button.position.x = camera.position.x;
             buttonStates[currentButtonState].button.position.z = camera.position.z;
         } else if (currentDisplayState === DisplayState.TRIGGER) {
-            scene.add(highlight);
-            scene.remove(buttonStates[currentButtonState].button);
+            buttonMainGroup.add(highlight);
+            buttonMainGroup.remove(buttonStates[currentButtonState].button);
             if (++currentButtonState >= buttonStates.length) {
                 currentButtonState = 0;
             }
             var buttonState = buttonStates[currentButtonState]
-            scene.add(buttonState.button);
+            buttonMainGroup.add(buttonState.button);
             highlight.position.x = camera.position.x;
             highlight.position.z = camera.position.z;
             buttonStates[currentButtonState].button.position.x = camera.position.x;
@@ -144,7 +128,7 @@ var LookDownSwitch = (function () {
     }
 
 
-    pub.create = function (theScene, theCamera, theButtonStates) {
+    api.create = function (theScene, theCamera, theButtonStates) {
         if (window.DeviceOrientationEvent) {
             console.log("DeviceOrientation is supported");
         } else {
@@ -163,11 +147,12 @@ var LookDownSwitch = (function () {
         }
         highlight = createHighLight();
 
-        scene = theScene;
+        buttonMainGroup = new THREE.Object3D();
         currentButtonState = 0;
-        scene.add(buttonStates[currentButtonState].button);
+        buttonMainGroup.add(buttonStates[currentButtonState].button);
+        theScene.add(buttonMainGroup);
         setState(DisplayState.TRIGGER);
     };
 
-    return pub;
+    return api;
 })();

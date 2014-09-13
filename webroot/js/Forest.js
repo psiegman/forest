@@ -37,6 +37,139 @@ var Forest = (function () {
     }
 
     function createSign() {
+        var sign = new THREE.Object3D();
+        var board = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 10, 10),
+            new THREE.MeshLambertMaterial({
+                color: 0xd2a95a,
+                ambient: 0xd2a95a
+            })
+        );
+//        board.translateX(0);
+        board.translateZ(2);
+        sign.add(board);
+
+        var material = new THREE.MeshPhongMaterial({
+            color: 0x000000,
+            ambient: 0x000000,
+        });
+
+        var nrSegments = 32;
+
+        var arrowLine = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.5, 0.5, 4, nrSegments),
+            material);
+        arrowLine.translateY(1);
+        sign.add(arrowLine);
+
+        var arrowHead = new THREE.Mesh(
+            new THREE.CylinderGeometry(1.5, 0, 3, nrSegments),
+            material)
+        arrowHead.translateY(-2);
+        sign.add(arrowHead);
+
+        var head = new THREE.Mesh(
+            new THREE.SphereGeometry(1, nrSegments, nrSegments),
+            material)
+        head.translateY(2.3);
+        head.translateZ(4.1);
+        sign.add(head);
+
+        var spine = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 2.6, nrSegments),
+            material)
+        spine.translateY(0.4);
+        spine.translateZ(3.7);
+        spine.rotation.x = 0.2;
+        sign.add(spine);
+
+        var leg1Upper = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.5, nrSegments),
+            material)
+        leg1Upper.translateY(-1.3);
+        leg1Upper.translateZ(3.9);
+        leg1Upper.rotation.x = -0.8;
+        sign.add(leg1Upper);
+
+        var leg1Lower = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.5, nrSegments),
+            material)
+        leg1Lower.translateY(-2.5);
+        leg1Lower.translateZ(4.5);
+        leg1Lower.rotation.x = -0.1;
+        sign.add(leg1Lower);
+
+        var foot1 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1, nrSegments),
+            material)
+        foot1.translateY(-3.4);
+        foot1.translateZ(4.9);
+        foot1.rotation.x = -1.4;
+        sign.add(foot1);
+
+        var leg2Upper = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.5, nrSegments),
+            material)
+        leg2Upper.translateY(-1.6);
+        leg2Upper.translateZ(3.2);
+        leg2Upper.rotation.x = 0.2;
+        sign.add(leg2Upper);
+
+        var leg2Lower = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.5, nrSegments),
+            material)
+        leg2Lower.translateY(-2.9);
+        leg2Lower.translateZ(2.6);
+        leg2Lower.rotation.x = 0.6;
+        sign.add(leg2Lower);
+
+        var foot2 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1, nrSegments),
+            material)
+        foot2.translateY(-3.5);
+        foot2.translateZ(2.7);
+        foot2.rotation.x = -1.4;
+        sign.add(foot2);
+
+        var arm1Upper = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
+            material)
+        arm1Upper.translateY(0.3);
+        arm1Upper.translateZ(4.4);
+        arm1Upper.rotation.x = -1.2;
+        sign.add(arm1Upper);
+
+        var arm1Lower = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
+            material)
+        arm1Lower.translateY(0.2);
+        arm1Lower.translateZ(5.5);
+        arm1Lower.rotation.x = -1.8;
+        sign.add(arm1Lower);
+
+        var arm2Upper = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
+            material)
+        arm2Upper.translateY(0.3);
+        arm2Upper.translateZ(3.0);
+        arm2Upper.rotation.x = -1.8;
+        sign.add(arm2Upper);
+
+        var arm2Lower = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
+            material)
+        arm2Lower.translateY(-0.3);
+        arm2Lower.translateZ(2.3);
+        arm2Lower.rotation.x = -2.8;
+        sign.add(arm2Lower);
+
+        sign.translateX(10);
+        sign.translateY(10);
+        sign.translateZ(0);
+        return sign;
+    }
+
+    function createSignCanvas() {
         // create a canvas element
         var canvas1 = document.createElement('canvas');
         var ctx = canvas1.getContext('2d');
@@ -134,7 +267,6 @@ var Forest = (function () {
         var material = new THREE.MeshPhongMaterial({
             color: 0xf0f0f0,
             ambient: 0xc0c0f0,
-
         });
         //         var material = new THREE.MeshLambertMaterial({color: 0x7777ff});
         //var material = new THREE.MeshPhongMaterial( { ambient: 0xf0f0f0, color: 0xf0f0f0, specular: 0x000000, shininess: 1, shading: THREE.FlatShading } );
@@ -283,9 +415,9 @@ var Forest = (function () {
         var forest = new THREE.Object3D();
         var areasToAvoid = [];
         forest.add(createTholos(areasToAvoid));
-        for (var i = 0; i < 50; i++) {
-            forest.add(createTree(areasToAvoid));
-        }
+//        for (var i = 0; i < 50; i++) {
+//            forest.add(createTree(areasToAvoid));
+//        }
         forest.add(createSign());
         forest.castShadow = true;
         forest.receiveShadow = true;

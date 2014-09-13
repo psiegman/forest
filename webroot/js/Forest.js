@@ -36,6 +36,62 @@ var Forest = (function () {
         return x1 * c;
     }
 
+    function createSign() {
+        // create a canvas element
+        var canvas1 = document.createElement('canvas');
+        var ctx = canvas1.getContext('2d');
+        ctx.font = "Bold 32px Arial";
+        ctx.fillStyle = "rgba(255,0,0,1)";
+        ctx.strokeStyle = "rgba(255,0,0,1)";
+        ctx.fillText("\u2b07", 20, 40);
+
+        ctx.beginPath();
+        ctx.arc(71, 28, 8, 0, 2 * Math.PI);
+        ctx.moveTo(70, 35);
+        ctx.lineTo(65, 70);
+
+        // leg 1
+        ctx.lineTo(70, 85);
+        ctx.lineTo(70, 100);
+        ctx.lineTo(78, 97);
+
+        // leg 2
+        ctx.moveTo(64, 70);
+        ctx.lineTo(60, 85);
+        ctx.lineTo(50, 95);
+        ctx.lineTo(55, 103);
+
+        // arm 1
+        ctx.moveTo(69, 47);
+        ctx.lineTo(77, 59);
+        ctx.lineTo(83, 52);
+
+        // arm 2
+        ctx.moveTo(69, 47);
+        ctx.lineTo(57, 52);
+        ctx.lineTo(53, 55);
+
+        ctx.stroke();
+
+        // canvas contents will be used for a texture
+        var texture1 = new THREE.Texture(canvas1)
+        texture1.needsUpdate = true;
+
+        var material1 = new THREE.MeshBasicMaterial({
+            map: texture1,
+            side: THREE.DoubleSide
+        });
+        material1.transparent = false;
+
+        var mesh1 = new THREE.Mesh(
+            new THREE.PlaneGeometry(10, 10),
+            material1
+        );
+        mesh1.position.set(10, 10, 0);
+        mesh1.rotation.y = -Math.PI / 2;
+        return mesh1;
+    }
+
     /**
      * Subtracts one or more THREE.Geometries from a source THREE.Geometry.
      *
@@ -47,10 +103,10 @@ var Forest = (function () {
      * @return a ThreeBSP.node
      */
     function subtract(varargs) {
-		var mesh1 = new THREE.Mesh(arguments[0]);
+        var mesh1 = new THREE.Mesh(arguments[0]);
 
         var resultBsp = new ThreeBSP(mesh1);
-        for (var i = 1; i < arguments.length; i+= 2) {
+        for (var i = 1; i < arguments.length; i += 2) {
             var mesh2 = new THREE.Mesh(arguments[i]);
             var translation = arguments[i + 1];
             mesh2.translateX(translation.x);
@@ -75,9 +131,9 @@ var Forest = (function () {
         var baseRadius = 30;
 
         //        var material = new THREE.MeshBasicMaterial({color: 0xf0f0f0, shading:  THREE.FlatShading});
-        var material = new THREE.MeshLambertMaterial({
+        var material = new THREE.MeshPhongMaterial({
             color: 0xf0f0f0,
-            ambient: 0xf0f0f0,
+            ambient: 0xc0c0f0,
 
         });
         //         var material = new THREE.MeshLambertMaterial({color: 0x7777ff});
@@ -117,16 +173,16 @@ var Forest = (function () {
 
         // add roof
         var roofBsp = subtract(new THREE.SphereGeometry(baseRadius, nrSegments, nrSegments),
-                               new THREE.BoxGeometry(2 * baseRadius, 2* baseRadius, 2 * baseRadius),
-                               new THREE.Vector3(0, -baseRadius, 0),
-                               new THREE.CylinderGeometry(2 * pillarRadius, 2 * pillarRadius, baseRadius * 2, nrSegments),
-                               new THREE.Vector3(0, baseRadius, 0),
-                               new THREE.SphereGeometry(baseRadius - (2 * pillarRadius), nrSegments, nrSegments),
-                               new THREE.Vector3(0, 0, 0)
-                              );
+            new THREE.BoxGeometry(2 * baseRadius, 2 * baseRadius, 2 * baseRadius),
+            new THREE.Vector3(0, -baseRadius, 0),
+            new THREE.CylinderGeometry(2 * pillarRadius, 2 * pillarRadius, baseRadius * 200, nrSegments),
+            new THREE.Vector3(0, baseRadius, 0),
+            new THREE.SphereGeometry(baseRadius - (2 * pillarRadius), nrSegments, nrSegments),
+            new THREE.Vector3(0, 0, 0)
+        );
 
         var tholosRoof = roofBsp.toMesh(material);
-		tholosRoof.geometry.computeVertexNormals();
+        tholosRoof.geometry.computeVertexNormals();
 
         tholosRoof.translateY(40);
         tholos.add(tholosRoof);
@@ -230,6 +286,7 @@ var Forest = (function () {
         for (var i = 0; i < 50; i++) {
             forest.add(createTree(areasToAvoid));
         }
+        forest.add(createSign());
         forest.castShadow = true;
         forest.receiveShadow = true;
         return forest;

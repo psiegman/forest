@@ -415,9 +415,9 @@ var Forest = (function () {
         var forest = new THREE.Object3D();
         var areasToAvoid = [];
         forest.add(createTholos(areasToAvoid));
-//        for (var i = 0; i < 50; i++) {
-//            forest.add(createTree(areasToAvoid));
-//        }
+        for (var i = 0; i < 50; i++) {
+            forest.add(createTree(areasToAvoid));
+        }
         forest.add(createSign());
         forest.castShadow = true;
         forest.receiveShadow = true;

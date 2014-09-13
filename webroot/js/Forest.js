@@ -36,7 +36,7 @@ var Forest = (function () {
         return x1 * c;
     }
 
-    function createSign() {
+    function createSign(areasToAvoid) {
         var sign = new THREE.Object3D();
         var board = new THREE.Mesh(
             new THREE.BoxGeometry(0.5, 10, 10),
@@ -45,7 +45,7 @@ var Forest = (function () {
                 ambient: 0xd2a95a
             })
         );
-//        board.translateX(0);
+        //        board.translateX(0);
         board.translateZ(2);
         sign.add(board);
 
@@ -132,7 +132,7 @@ var Forest = (function () {
         sign.add(foot2);
 
         var arm1Upper = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
+            new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
             material)
         arm1Upper.translateY(0.3);
         arm1Upper.translateZ(4.4);
@@ -148,7 +148,7 @@ var Forest = (function () {
         sign.add(arm1Lower);
 
         var arm2Upper = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
+            new THREE.CylinderGeometry(0.3, 0.3, 1.3, nrSegments),
             material)
         arm2Upper.translateY(0.3);
         arm2Upper.translateZ(3.0);
@@ -166,6 +166,11 @@ var Forest = (function () {
         sign.translateX(10);
         sign.translateY(10);
         sign.translateZ(0);
+
+        var avoidMargin = 1.5;
+        areasToAvoid.push(new THREE.Box2(new THREE.Vector2(0, 15),
+            new THREE.Vector2(0, 15)));
+
         return sign;
     }
 
@@ -415,10 +420,10 @@ var Forest = (function () {
         var forest = new THREE.Object3D();
         var areasToAvoid = [];
         forest.add(createTholos(areasToAvoid));
+        forest.add(createSign(areasToAvoid));
         for (var i = 0; i < 50; i++) {
             forest.add(createTree(areasToAvoid));
         }
-        forest.add(createSign());
         forest.castShadow = true;
         forest.receiveShadow = true;
         return forest;

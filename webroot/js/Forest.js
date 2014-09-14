@@ -49,9 +49,9 @@ var Forest = (function () {
         board.translateZ(2);
         sign.add(board);
 
-        var material = new THREE.MeshPhongMaterial({
+        var material = new THREE.MeshLambertMaterial({
             color: 0x000000,
-            ambient: 0x000000,
+            ambient: 0x000000
         });
 
         var nrSegments = 32;

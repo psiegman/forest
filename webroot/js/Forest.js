@@ -40,7 +40,7 @@ var Forest = (function () {
         var sign = new THREE.Object3D();
         var board = new THREE.Mesh(
             new THREE.BoxGeometry(0.5, 10, 10),
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshBasicMaterial({
                 color: 0xd2a95a,
                 ambient: 0xd2a95a
             })
@@ -49,7 +49,7 @@ var Forest = (function () {
         board.translateZ(2);
         sign.add(board);
 
-        var material = new THREE.MeshLambertMaterial({
+        var material = new THREE.MeshBasicMaterial({
             color: 0x000000,
             ambient: 0x000000
         });
@@ -267,14 +267,16 @@ var Forest = (function () {
 
         // add base
         var baseRadius = 30;
-
+        var nrSegments = 32;
         //        var material = new THREE.MeshBasicMaterial({color: 0xf0f0f0, shading:  THREE.FlatShading});
-        var material = new THREE.MeshPhongMaterial({
-            color: 0xf0f0f0,
-            ambient: 0xc0c0f0,
-        });
-        //         var material = new THREE.MeshLambertMaterial({color: 0x7777ff});
-        //var material = new THREE.MeshPhongMaterial( { ambient: 0xf0f0f0, color: 0xf0f0f0, specular: 0x000000, shininess: 1, shading: THREE.FlatShading } );
+//        var materialX = new THREE.MeshPhongMaterial({
+//            color: 0xffffff,
+//            ambient: 0xf0f0f0,
+//            specular: 0xffffff,
+//            shininess: 1,
+//            shading: THREE.FlatShading
+//        });
+        var material = new THREE.MeshBasicMaterial({color: 0xffffff});
 
         var nrSteps = 3;
         var stepHeight = 2;
@@ -371,8 +373,8 @@ var Forest = (function () {
     function createTree(avoidAreas) {
         var tree = new THREE.Object3D();
 
-        var forestWidth = 400;
-        var forestBreadth = 400;
+        var forestWidth = 300;
+        var forestBreadth = 300;
 
         var xPos = (Math.random() * forestWidth) - (forestWidth / 2);
         var zPos = (Math.random() * forestBreadth) - (forestBreadth / 2);
@@ -384,7 +386,7 @@ var Forest = (function () {
         var maxTrunkRadius = 5;
         var trunkRadius = Math.random() * maxTrunkRadius;
         var trunkHeight = (4 * trunkRadius) + (Math.random() * (40 - (4 * maxTrunkRadius)));
-        var trunkMaterial = new THREE.MeshLambertMaterial({
+        var trunkMaterial = new THREE.MeshBasicMaterial({
             color: createTrunkColor(),
             ambient: createTrunkColor()
         });
@@ -398,7 +400,7 @@ var Forest = (function () {
         tree.add(treeTrunk);
 
         var treeCrownRadius = (trunkHeight + normRand()) / 2;
-        var leafMaterial = new THREE.MeshLambertMaterial({
+        var leafMaterial = new THREE.MeshBasicMaterial({
             color: createLeafColor(),
             ambient: createLeafColor(),
             opacity: 0.98,

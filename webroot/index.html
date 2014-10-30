@@ -31,6 +31,7 @@
     <script type="text/javascript" src="js/OrbitControls.js"></script>
     <script type="text/javascript" src="js/LookDownSwitch.js"></script>
     <script type="text/javascript" src="js/Forest.js"></script>
+    <script type="text/javascript" src="js/MersenneTwister.js"></script>
 
     <script>
         "use strict";
@@ -45,8 +46,30 @@
         var speed = 7; // grid units per second
         var isMoving = true;
 
+
         init();
         animate();
+
+        function handleKeyDown(event) {
+            event = event || window.event;
+
+            var distance = 1;
+            var position = this.camera.position;
+
+            if (event.keyCode == '37') {
+                // key left
+                position.z = position.z - distance;
+            } else if (event.keyCode == '38') {
+                // key up
+                position.x = position.x + distance;
+            } else if (event.keyCode == '39') {
+                // key right
+                position.z = position.z + distance;
+            } else if (event.keyCode == '40') {
+                // key down
+                position.x = position.x - distance;
+            }
+        }
 
         function startMoving() {
             isMoving = true;
@@ -55,6 +78,28 @@
         function stopMoving() {
             isMoving = false;
         }
+
+        function updatePosition(geoLocation) {
+
+            var pos = geoLocation.coords;
+            console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
+            /*
+            if (target.latitude === crd.latitude && target.longitude === crd.longitude) {
+                console.log('Congratulation, you reach the target');
+                navigator.geolocation.clearWatch(id);
+            }
+            */
+        }
+
+        function updatePositionFail(error) {
+            console.warn('ERROR(' + err.code + '): ' + err.message);
+        }
+
+        var geoLocationOptions = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        };
 
         function init() {
 
@@ -86,13 +131,12 @@
 
 
             // create the ground plane
-            var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
-            var planeMaterial = new THREE.MeshPhongMaterial({
-                color: 0x00c000,
+            var planeGeometry = new THREE.PlaneBufferGeometry(1000, 1000, 1, 1);
+            var planeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00f000,
                 ambient: 0xffffff
             });
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.receiveShadow = true;
 
             // rotate and position the plane
             plane.rotation.x = -0.5 * Math.PI;
@@ -106,18 +150,21 @@
 
             // LIGHTS
 
-            var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
-            hemiLight.color.setHSL(0.6, 1, 0.6);
+            var hemiLight = new THREE.HemisphereLight(0xc0c0ff, 0xc0c0ff, 0.8);
+            //            hemiLight.color.setHSL(0.6, 1, 0.6);
+            hemiLight.color.setHex(0xf0f0ff);
             hemiLight.groundColor.setHSL(0.095, 1, 0.75);
             hemiLight.position.set(0, 500, 0);
-            scene.add(hemiLight);
+//            scene.add(hemiLight);
 
+            //            var ambientLight = new THREE.AmbientLight(0xffffff ); // soft white light scene.add( light );
+            //            scene.add(ambientLight);
 
             var dirLight = new THREE.DirectionalLight(0xffffff, 1);
             dirLight.color.setHSL(0.1, 1, 0.95);
             dirLight.position.set(-1, 1.75, 1);
             dirLight.position.multiplyScalar(50);
-            scene.add(dirLight);
+            //            scene.add(dirLight);
 
             dirLight.castShadow = true;
 
@@ -153,6 +200,12 @@
                 controls.noPan = true;
                 controls.autoRotate = false;
             }
+            /*
+            controls = new THREE.FirstPersonControls(camera);
+            controls.movementSpeed = 5;
+            controls.lookSpeed = 0.125;
+            controls.lookVertical = true;
+            */
 
             scene.add(Forest.createForest());
 
@@ -164,7 +217,11 @@
                 callback: stopMoving
             }]);
 
+            window.addEventListener('keydown', handleKeyDown, false);
             window.addEventListener('resize', resize, false);
+
+//            var geoLocationId = navigator.geolocation.watchPosition(updatePosition, updatePositionFail, geoLocationOptions);
+
             setTimeout(resize, 1);
         }
 
@@ -189,18 +246,12 @@
          // the amount to move in the X and Z direction
         function calculateMove2D(dt) {
             var distanceSinceLastUpdate = speed * dt;
-            var cameraVector = new THREE.Vector3(0, 0, -1);
-            cameraVector.applyQuaternion(camera.quaternion);
-            var q = cameraVector.x / cameraVector.y;
-            var dY = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(q, 2)))
-            var dX = Math.sqrt(Math.pow(distanceSinceLastUpdate, 2) / (1.0 + Math.pow(1.0 / q, 2)))
-            if (cameraVector.x < 0) {
-                dX = -dX;
-            }
-            if (cameraVector.y < 0) {
-                dY = -dY;
-            }
-            //            console.log("distance:" + distanceSinceLastUpdate + ", camera x:" + cameraVector.x + ", cameraY:" + cameraVector.y + ", dX:" + dX + ", dY:" + dY);
+            var cameraDirection = camera.getWorldDirection();
+            var totalAngle = Math.abs(cameraDirection.x) + Math.abs(cameraDirection.z);
+
+            var dX = distanceSinceLastUpdate * (cameraDirection.x / totalAngle);
+            var dY = distanceSinceLastUpdate * (cameraDirection.z / totalAngle);
+
             return new THREE.Vector2(dX, dY);
         }
 

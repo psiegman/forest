@@ -183,32 +183,6 @@ QUnit.test("geoPos.updateGeoLocation 2 seconds", function(assert) {
 });
 
 
-/*
-QUnit.test("geoPos.getHeadingSpeedDistance 1 second", function(assert) {
-    var geoLocation1 = {
-        timestamp: 0,
-        coords: {
-            latitude: 52.4490101,
-            longitude: 4.8187594
-        }
-    };
-    geoPos.updateGeoLocation(geoLocation1);
-
-    var geoLocation2 = {
-        timestamp: 1000,
-        coords: {
-            latitude: 52.4490848,
-            longitude: 4.8186594
-        }
-    };
-    geoPos.updateGeoLocation(geoLocation2);
-
-    var hsp = geoPos.getHeadingSpeedDistance(1);
-    assert.equal(hsp.distanceX.toFixed(NR_DIGITS), -6.776960602240946.toFixed(NR_DIGITS), "distanceX");
-    assert.equal(hsp.distanceY.toFixed(NR_DIGITS), 8.306261020235553.toFixed(NR_DIGITS), "distanceY");
-});
-*/
-
 
 QUnit.test("geoPos.getPositionAtTime 0.5 second", function(assert) {
 	var geoPos = new GeoPosition();
@@ -236,15 +210,14 @@ QUnit.test("geoPos.getPositionAtTime 0.5 second", function(assert) {
 });
 
 
-/*
 QUnit.test("geoPos.getFuturePosition unitialized", function(assert) {
+	var geoPos = new GeoPosition();
     var pos = geoPos.getFuturePosition(17, 23, 3);
 
     assert.equal(pos.x.toFixed(NR_DIGITS), 17.0.toFixed(NR_DIGITS), "positionX");
     assert.equal(pos.y.toFixed(NR_DIGITS), 23.0.toFixed(NR_DIGITS), "positionY");
     assert.equal(pos.lastGeoLocation, undefined, "last geoLocation");
 });
-*/
 
 QUnit.test("geoPos.getFuturePosition speed 0", function(assert) {
 	var geoPos = new GeoPosition();

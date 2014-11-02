@@ -31,6 +31,7 @@
     <script type="text/javascript" src="js/OrbitControls.js"></script>
     <script type="text/javascript" src="js/LookDownSwitch.js"></script>
     <script type="text/javascript" src="js/Forest.js"></script>
+    <script type="text/javascript" src="js/GeoPosition.js"></script>
     <script type="text/javascript" src="js/MersenneTwister.js"></script>
 
     <script>
@@ -46,7 +47,8 @@
         var speed = 7; // grid units per second
         var isMoving = true;
 
-
+        var geoPosition;
+        
         init();
         animate();
 
@@ -79,27 +81,6 @@
             isMoving = false;
         }
 
-        function updatePosition(geoLocation) {
-
-            var pos = geoLocation.coords;
-            console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
-            /*
-            if (target.latitude === crd.latitude && target.longitude === crd.longitude) {
-                console.log('Congratulation, you reach the target');
-                navigator.geolocation.clearWatch(id);
-            }
-            */
-        }
-
-        function updatePositionFail(error) {
-            console.warn('ERROR(' + err.code + '): ' + err.message);
-        }
-
-        var geoLocationOptions = {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        };
 
         function init() {
 
@@ -220,8 +201,7 @@
             window.addEventListener('keydown', handleKeyDown, false);
             window.addEventListener('resize', resize, false);
 
-//            var geoLocationId = navigator.geolocation.watchPosition(updatePosition, updatePositionFail, geoLocationOptions);
-
+            geoPosition = new GeoPosition();
             setTimeout(resize, 1);
         }
 

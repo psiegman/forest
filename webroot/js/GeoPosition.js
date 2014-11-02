@@ -209,24 +209,24 @@ GeoPosition.prototype.getCurrentTimestamp = function () {
  * @param time time in milliseconds since January 1st, 1970
  */
 GeoPosition.prototype.getPositionAtTime = function (time) {
-    if (currentGeoLocation === undefined) {
+    if (this.currentGeoLocation === undefined) {
         return undefined;
     }
 
     if (speed == 0) {
         return {
-            positionX: positionX,
-            positionY: positionY
+            x: this.positionX,
+            y: this.positionY
         }
     }
 
 
-    var dTime = (time - currentGeoLocation.timestamp) / 1000;
-    var timedPositionX = positionX + (speedX * dTime);
-    var timedPositionY = positionY + (speedY * dTime);
+    var dTime = (time - this.currentGeoLocation.timestamp) / 1000;
+    var timedPositionX = this.positionX + (this.speedX * dTime);
+    var timedPositionY = this.positionY + (this.speedY * dTime);
     return {
-        positionX: timedPositionX,
-        positionY: timedPositionY
+        x: timedPositionX,
+        y: timedPositionY
     }
 }
 
@@ -270,7 +270,7 @@ GeoPosition.prototype.getPositionAtDistance = function (x1, y1, x2, y2, d) {
  */
 GeoPosition.prototype.getFuturePosition = function (currentX, currentY, dTime, currentTime) {
     // GPS is not initialized yet
-    if (currentGeoLocation === undefined) {
+    if (this.currentGeoLocation === undefined) {
         return {
             x: currentX,
             y: currentY
@@ -278,29 +278,29 @@ GeoPosition.prototype.getFuturePosition = function (currentX, currentY, dTime, c
     }
 
     // we're standing still
-    if (speed === 0) {
+    if (this.speed === 0) {
         return {
             x: currentX,
             y: currentY,
             speed: 0,
-            lastGeoLocation: currentGeoLocation
+            lastGeoLocation: this.currentGeoLocation
         }
     }
 
     // where should we be at time timestamp
-    currentTime = currentTime || getCurrentTimestamp();
+    currentTime = currentTime || this.getCurrentTimestamp();
     var whereWeShouldBeAtDTime = this.getPositionAtTime(currentTime + dTime);
 
     // travel at our current speed during dTime from our current postion in the direction of where we should be
     var distance = speed * (dTime / 1000);
 
-    var positionAtDistance = this.getPositionAtDistance(currentX, currentY, whereWeShouldBeAtDTime.positionX, whereWeShouldBeAtDTime.positionY, distance);
+    var positionAtDistance = this.getPositionAtDistance(currentX, currentY, whereWeShouldBeAtDTime.x, whereWeShouldBeAtDTime.y, distance);
 
     return {
         x: positionAtDistance.x,
         y: positionAtDistance.y,
-        speed: speed,
-        lastGeoLocation: currentGeoLocation
+        speed: this.speed,
+        lastGeoLocation: this.currentGeoLocation
     };
 }
 

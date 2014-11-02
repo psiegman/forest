@@ -2,6 +2,7 @@
  * Maintains the position in the world.
  * Allows for updates from the gps system and frequent "where-am-I-now" queries.
  * Current position is estimated based on last GPS update.
+ * @class
  */
 function GeoPosition() {
     "use strict";
@@ -36,8 +37,8 @@ function GeoPosition() {
  * Will overwrite existing zero position.
  */
 GeoPosition.prototype.setZeroLocation = function (newZeroLat, newZeroLon) {
-    zeroLat = newZeroLat;
-    zeroLon = newZeroLon;
+    this.zeroLat = newZeroLat;
+    this.zeroLon = newZeroLon;
 }
 
 GeoPosition.prototype.updatePosition = function (geoLocation) {
@@ -304,16 +305,6 @@ GeoPosition.prototype.getFuturePosition = function (currentX, currentY, dTime, c
     };
 }
 
-
-/**
- * Set the GPS position to be used as point 0,0 on the x/y axis.
- * If not set the first GPS position will be used.
- * Will overwrite existing zero position.
- */
-GeoPosition.prototype.setZeroLocation = function (newZeroLat, newZeroLon) {
-    zeroLat = newZeroLat;
-    zeroLon = newZeroLon;
-}
 
 GeoPosition.prototype.updatePosition = function (geoLocation) {
 

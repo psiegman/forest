@@ -213,7 +213,7 @@ GeoPosition.prototype.getPositionAtTime = function (time) {
         return undefined;
     }
 
-    if (speed == 0) {
+    if (this.speed == 0) {
         return {
             x: this.positionX,
             y: this.positionY
@@ -292,7 +292,7 @@ GeoPosition.prototype.getFuturePosition = function (currentX, currentY, dTime, c
     var whereWeShouldBeAtDTime = this.getPositionAtTime(currentTime + dTime);
 
     // travel at our current speed during dTime from our current postion in the direction of where we should be
-    var distance = speed * (dTime / 1000);
+    var distance = this.speed * (dTime / 1000);
 
     var positionAtDistance = this.getPositionAtDistance(currentX, currentY, whereWeShouldBeAtDTime.x, whereWeShouldBeAtDTime.y, distance);
 

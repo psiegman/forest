@@ -2,6 +2,15 @@
 
 [An Introduction to 3D content on the Web](http://felixpalmer.github.io/safari-webgl/presentation.html)
 
+## Locations
+
+
+(52.372833, 4.892020) => (52.373058, 4.892018) = 25m
+
+(52.373099, 4.892026) => (52.373312, 4.892026) = 25m
+
+
+
 ## motion
 [Sensor Fusion on Android Devices: A Revolution in Motion Processing ](https://www.youtube.com/watch?v=C7JQ7Rpwn2k)
 

@@ -48,8 +48,9 @@
         var isMoving = true;
 
         var geoPosition;
-		var posX = 0;
-		var posY = 0;
+		var posX = 0; // position in meters
+		var posY = 0; // position in meters
+		var meter2forestFactor = 100;
         
         init();
         animate();
@@ -237,19 +238,23 @@
             return new THREE.Vector2(dX, dY);
         }
 
+
         function update(dt) {
             resize();
             if (isMoving) {
                 var xyMove = calculateMove2D(dt);
                 camera.position.x = camera.position.x + xyMove.x;
                 camera.position.z = camera.position.z + xyMove.y;
+
+				posX = camera.position.x / meter2forestFactor;
+                posY = camera.position.y / meter2forestFactor;
             } else {
 				var position = geoPosition.getFuturePosition(posX, posY, dt);
-				// console.log('pos x: ' + posX + " => " + position.x + ', pos y: ' + posY + " => " + position.y);
+				console.log('pos x: ' + posX + " => " + position.x + ', pos y: ' + posY + " => " + position.y);
 				posX = position.x;
                 posY = position.y;
-                camera.position.x = position.x;
-                camera.position.z = position.y;
+                camera.position.x = meter2forestFactor * position.x;
+                camera.position.z = meter2forestFactor * position.y;
 			}
             camera.updateProjectionMatrix();
 

@@ -116,10 +116,6 @@ GeoPosition.prototype.calculateDistances = function(lat1, lon1, lat2, lon2) {
     };
 }
 
-GeoPosition.prototype.hello = function() {
-    alert('hi');
-}
-
 
 /**
  * Update current speed/distance/heading with information from the given geoLocation.
@@ -214,7 +210,7 @@ GeoPosition.prototype.getPositionAtTime = function (time) {
         return undefined;
     }
 
-    if (this.speed == 0) {
+    if (this.speed === 0) {
         return {
             x: this.positionX,
             y: this.positionY
@@ -238,18 +234,13 @@ GeoPosition.prototype.getPositionAtTime = function (time) {
  */
 GeoPosition.prototype.getPositionAtDistance = function (x1, y1, x2, y2, d) {
 
-    var angle = Math.abs(y2 - y1) / Math.abs(x2 - x1);
+	var totalDistance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+	var relativeDistance = d / totalDistance;
 
-    var dX = (d * Math.cos(angle));
-    if (x1 > x2) {
-        dX = -dX;
-    }
+	var dX = relativeDistance * (x2 - x1);
+	var dY = relativeDistance * (y2 - y1);
+
     var x = x1 + dX;
-
-    var dY = (d * Math.sin(angle));
-    if (y1 > y2) {
-        dY = -dY;
-    }
     var y = y1 + dY;
 
     return {

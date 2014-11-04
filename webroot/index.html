@@ -50,7 +50,7 @@
         var geoPosition;
 		var posX = 0; // position in meters
 		var posY = 0; // position in meters
-		var meter2forestFactor = 100;
+		var meter2forestFactor = 2;
         
         init();
         animate();
@@ -249,8 +249,8 @@
 				posX = camera.position.x / meter2forestFactor;
                 posY = camera.position.y / meter2forestFactor;
             } else {
-				var position = geoPosition.getFuturePosition(posX, posY, dt);
-				console.log('pos x: ' + posX + " => " + position.x + ', pos y: ' + posY + " => " + position.y);
+				var position = geoPosition.getFuturePosition(posX, posY, (1000 * dt));
+				console.log('dt:' + (1000 * dt) + ', pos x: ' + posX + " => " + position.x + ', pos y: ' + posY + " => " + position.y);
 				posX = position.x;
                 posY = position.y;
                 camera.position.x = meter2forestFactor * position.x;

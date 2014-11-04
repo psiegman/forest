@@ -48,7 +48,7 @@ GeoPosition.prototype.updatePosition = function (geoLocation) {
 }
 
 GeoPosition.prototype.updatePositionFail = function (error) {
-    console.warn('ERROR(' + err.code + '): ' + err.message);
+    console.warn('ERROR(' + error.code + '): ' + error.message);
 }
 
 /**

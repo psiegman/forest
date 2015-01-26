@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Cardboard Forest</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        input {
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript" src="js/GeoPosition.js"></script>
+    <form>
+        <table>
+            <tr><td>time</td><td><input id="currentTime"/></td></tr>
+            <tr><td>gps time</td><td><input id="geoTime"/></td></tr>
+            <tr><td>pos X</td><td><input id="posX"/></td></tr>
+            <tr><td>pos Y</td><td><input id="posY"/></td></tr>
+            <tr><td>geo Latitude</td><td><input id="geoLat"/></td></tr>
+            <tr><td>geo Longitude</td><td><input id="geoLon"/></td></tr>
+        </table>
+    </form>
+    <script type="text/javascript">
+        "use strict";
+        var geoPosition;
+		var posX = 0; // position in meters
+		var posY = 0; // position in meters
+        var geoPosition = new GeoPosition();
+		var meter2forestFactor = 2;
+        var dt = 500;
+        setInterval(update, dt);
+
+        function setValue(element, value) {
+            document.getElementById(element).value = value;
+        }
+        
+        function update() {
+            var position = geoPosition.getCurrentPosition();
+            posX = position.x;
+            posY = position.y;
+            setValue('currentTime', new Date());
+            setValue('posX', posX);
+            setValue('posY', posY);
+            if (position.lastGeoLocation) {
+                setValue('geoTime', new Date(position.lastGeoLocation.timestamp));
+                setValue('geoLat', position.lastGeoLocation.coords.latitude.toFixed(7));
+                setValue('geoLon', position.lastGeoLocation.coords.longitude.toFixed(7));
+            }
+            
+            /*
+            camera.position.x = meter2forestFactor * position.x;
+            camera.position.z = meter2forestFactor * position.y;
+            var message = ''
+            if (position.lastGeoLocation) {
+                if ( ! initialGeoLocation) {
+                    initialGeoLocation = position.lastGeoLocation;
+                }
+                var geoLocation = position.lastGeoLocation;
+                var distances = geoPosition.calculateDistances(initialGeoLocation.coords.latitude, initialGeoLocation.coords.longitude, geoLocation.coords.latitude, geoLocation.coords.longitutude);
+                message += new Date(geoLocation.timestamp) + ' ' + geoLocation.coords.latitude.toFixed(7) + ', ' + geoLocation.coords.longitude.toFixed(7) + ". (" + distances.distanceX + ", " + distances.distanceY + ")";
+            }
+            message += '<br/>';
+            message += 'dt:' + (1000 * dt).toFixed(0) + ', pos x: ' + posX.toFixed(2) + " => " + position.x.toFixed(2) + ', pos y: ' + posY.toFixed(2) + " => " + position.y.toFixed(2) + ", camera x:" + camera.position.x.toFixed(2) + ", camera z:" + camera.position.z.toFixed(2);
+            */
+        }
+    </script>
+    
+    </body>
+</html>

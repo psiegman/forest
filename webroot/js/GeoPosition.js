@@ -2,32 +2,40 @@
  * Maintains the position in the world.
  * Allows for updates from the gps system and frequent "where-am-I-now" queries.
  * Current position is estimated based on last GPS update.
+ * 
+ * @param watchPostion whether to start the navigator.geoLocation.watchPosition (optional, default true)
+ *
  * @class
  */
-function GeoPosition() {
+function GeoPosition(watchPosition) {
     "use strict";
 
-    var currentGeoLocation;
-    var zeroLat;
+    watchPosition = watchPosition || true
+    
+    var currentGeoLocation = null;
+    var zeroLat = null;
     var zeroLon;
-    var speed; // in meters per second
-    var speedX;
-    var speedY;
+    var speed = 0; // in meters per second
+    var speedX = 0;
+    var speedY = 0;
 
     // in meters respective to zeroLat and zeroLon
-    var positionX;
-    var positionY;
+    var positionX = 0;
+    var positionY = 0;
 
-    var geoLocationOptions = {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-    };
-    var self = this;
-    var geoLocationId = navigator.geolocation.watchPosition(function(geoLocation) {
-        return self.updateGeoLocation(geoLocation);
+    
+    if (watchPosition) {
+        var geoLocationOptions = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        };
+        var self = this;
+        var geoLocationId = navigator.geolocation.watchPosition(function(geoLocation) {
+            return self.updateGeoLocation(geoLocation);
+        }
+            , this.updatePositionFail, geoLocationOptions);
     }
-        , this.updatePositionFail, geoLocationOptions);
 }
 
 
@@ -44,7 +52,7 @@ GeoPosition.prototype.setZeroLocation = function (newZeroLat, newZeroLon) {
 GeoPosition.prototype.updatePosition = function (geoLocation) {
 
     var pos = geoLocation.coords;
-    console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
+    // console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
 }
 
 GeoPosition.prototype.updatePositionFail = function (error) {
@@ -105,7 +113,7 @@ GeoPosition.prototype.calculateDistances = function(lat1, lon1, lat2, lon2) {
     // distance traveled over longitude/x-axis in meters
     // calculated by pythagoras formula on distance and distanceY
     var distanceX = Math.sqrt((distance * distance) - (distanceY * distanceY));
-
+    
     distanceX = this.calculateXSign(lon1, lon2) * distanceX;
     distanceY = this.calculateYSign(lat1, lat2) * distanceY;
 
@@ -122,12 +130,12 @@ GeoPosition.prototype.calculateDistances = function(lat1, lon1, lat2, lon2) {
  */
 GeoPosition.prototype.updateGeoLocation = function(geoLocation) {
     var pos = geoLocation.coords;
-    console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
-    if (this.currentGeoLocation === undefined) {
+    // console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
+    if (this.currentGeoLocation == null) {
         this.speed = 0;
         this.currentGeoLocation = geoLocation;
 
-        if (this.zeroLat === undefined) {
+        if (this.zeroLat == null) {
             this.zeroLat = this.currentGeoLocation.coords.latitude;
             this.zeroLon = this.currentGeoLocation.coords.longitude;
             var absoluteDistances = this.calculateDistances(this.zeroLat, this.zeroLon, geoLocation.coords.latitude, geoLocation.coords.longitude);
@@ -296,11 +304,42 @@ GeoPosition.prototype.getFuturePosition = function (currentX, currentY, dTime, c
     };
 }
 
+/**
+ * @param currentTime time in milliseconds since january 1st, 1970 (optional, default now)
+ */
+GeoPosition.prototype.getCurrentPosition = function(currentTime) {
+    // GPS is not initialized yet
+    if (this.currentGeoLocation === undefined) {
+        return {
+            x: this.positionX,
+            y: this.positionY,
+            speed: 0
+        }
+    }
+
+    // we're standing still
+    if (this.speed === 0) {
+        return {
+            x: this.positionX,
+            y: this.positionY,
+            speed: 0,
+            lastGeoLocation: this.currentGeoLocation
+        }
+    }
+    currentTime = currentTime || this.getCurrentTimestamp();
+    var position = this.getPositionAtTime(currentTime);
+    return {
+        x: position.x,
+        y: position.y,
+        speed: this.speed,
+        lastGeoLocation: this.currentGeoLocation
+    };
+}
 
 GeoPosition.prototype.updatePosition = function (geoLocation) {
 
     var pos = geoLocation.coords;
-    console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
+    // console.log("latitude:" + pos.latitude + ", longitude:" + pos.longitude + ", accuracy: " + pos.accuracy + ", heading: " + pos.heading + ", speed:" + pos.speed);
     /*
             if (target.latitude === crd.latitude && target.longitude === crd.longitude) {
                 console.log('Congratulation, you reach the target');

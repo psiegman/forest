@@ -10,19 +10,28 @@
             margin: 0px;
             overflow: hidden;
         }
-        #example {
+        #scene {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
         }
+
+		.console {
+			font-family: monospace;
+    		background:white;
+		}
     </style>
 </head>
 
 <body>
-    <div id="example"></div>
-
+    <div id="scene"></div>
+    <!--
+    <div id="console" class="console" style="position:absolute;left:0px;bottom:25%;width:100%;border:1px solid black;overflow:hidden;height:40px;">
+			hi
+		</div>
+-->
     <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/ThreeCSG.js"></script>
     <script type="text/javascript" src="js/has.js"></script>
@@ -47,13 +56,18 @@
         var speed = 7; // grid units per second
         var isMoving = true;
 
+        var initialGeoLocation; // first known geoLocation
+        
         var geoPosition;
 		var posX = 0; // position in meters
 		var posY = 0; // position in meters
 		var meter2forestFactor = 2;
         
+        hud("1");
         init();
+        hud("2");
         animate();
+        hud("3");
 
         function handleKeyDown(event) {
             event = event || window.event;
@@ -97,7 +111,7 @@
 
 
             // RENDERER
-            container = document.getElementById('example');
+            container = document.getElementById('scene');
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
@@ -115,7 +129,7 @@
 
 
             // create the ground plane
-            var planeGeometry = new THREE.PlaneBufferGeometry(1000, 1000, 1, 1);
+            var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
             var planeMaterial = new THREE.MeshBasicMaterial({
                 color: 0x00f000,
                 ambient: 0xffffff
@@ -204,15 +218,8 @@
             window.addEventListener('keydown', handleKeyDown, false);
             window.addEventListener('resize', resize, false);
 
-            geoPosition = new GeoPosition();
+            // geoPosition = new GeoPosition();
             setTimeout(resize, 1);
-        }
-
-
-        function cameraOrientation(camera) {
-            var vector = new THREE.Vector3(0, 0, -1);
-            vector.applyEuler(camera.rotation, camera.rotation.order);
-            return vector;
         }
 
         function resize() {
@@ -249,18 +256,40 @@
 				posX = camera.position.x / meter2forestFactor;
                 posY = camera.position.y / meter2forestFactor;
             } else {
-				var position = geoPosition.getFuturePosition(posX, posY, (1000 * dt));
-				console.log('dt:' + (1000 * dt) + ', pos x: ' + posX + " => " + position.x + ', pos y: ' + posY + " => " + position.y);
-				posX = position.x;
-                posY = position.y;
-                camera.position.x = meter2forestFactor * position.x;
-                camera.position.z = meter2forestFactor * position.y;
+				if (geoPosition) {
+						var position = geoPosition.getCurrentPosition();
+						posX = position.x;
+						posY = position.y;
+						camera.position.x = meter2forestFactor * position.x;
+						camera.position.z = meter2forestFactor * position.y;
+				}
+                /*
+                var message = ''
+                if (position.lastGeoLocation) {
+                    if ( ! initialGeoLocation) {
+                        initialGeoLocation = position.lastGeoLocation;
+                    }
+                    var geoLocation = position.lastGeoLocation;
+                    var distances = geoPosition.calculateDistances(initialGeoLocation.coords.latitude, initialGeoLocation.coords.longitude, geoLocation.coords.latitude, geoLocation.coords.longitutude);
+                    message += new Date(geoLocation.timestamp) + ' ' + geoLocation.coords.latitude.toFixed(7) + ', ' + geoLocation.coords.longitude.toFixed(7) + ". (" + distances.distanceX + ", " + distances.distanceY + ")";
+                }
+                message += '<br/>';
+                message += 'dt:' + (1000 * dt).toFixed(0) + ', pos x: ' + posX.toFixed(2) + " => " + position.x.toFixed(2) + ', pos y: ' + posY.toFixed(2) + " => " + position.y.toFixed(2) + ", camera x:" + camera.position.x.toFixed(2) + ", camera z:" + camera.position.z.toFixed(2);
+                hud(message);
+                */
 			}
             camera.updateProjectionMatrix();
 
             controls.update(dt);
         }
 
+        function hud(text) {
+            var hudElement = document.getElementById('console');
+            if (hudElement) {
+                hudElement.innerHTML = text;
+            }
+        }
+        
         function render(dt) {
             effect.render(scene, camera);
         }
